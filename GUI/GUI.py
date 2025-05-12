@@ -1,6 +1,7 @@
 import streamlit as st
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 import pandas as pd
+import re
 
 # Initialize session state
 if "selected_sentence" not in st.session_state:
@@ -52,7 +53,7 @@ selected_sentence = st.sidebar.selectbox(
 # Abbreviations and their full forms
 abbreviations = {
     "ANG": "Anger",
-    "DUC": "Document or Discussion",
+    "DUC": "Document\Discussion",
     "EVE": "Event",
     "FAC": "Facility",
     "GPE": "Geopolitical Entity",
@@ -91,24 +92,18 @@ input_text = st.text_area(
     key="input_box"
 )
 
-# دالة للتحقق من أن النص كله عربي فقط
+
+
 def is_arabic(text):
-    return all(
-        char == ' ' or
-        '\u0600' <= char <= '\u06FF' or
-        '\u0750' <= char <= '\u077F' or
-        '\u08A0' <= char <= '\u08FF' or
-        '\uFB50' <= char <= '\uFDFF' or
-        '\uFE70' <= char <= '\uFEFF' or
-        not char.isalpha()
-        for char in text
-    )
+    return not bool(re.search(r'[A-Za-z]', text))
+
+
 # Run NER when the button is pressed
 if st.button("Run NER"):
     if not input_text.strip():  # If no input is provided
         st.warning("Please enter arabic text or select an example sentence.")
     elif not is_arabic(input_text) and not selected_sentence:
-        st.error("Please enter arabic text or select an example sentence!")
+        st.error("Please enter arabic text ,, English text is not allowed")
     else:
         ner_results = ner_model(input_text)
 
